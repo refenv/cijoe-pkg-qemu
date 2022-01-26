@@ -33,11 +33,9 @@ submit a `Pull request`_ with your changes.
 Test-target Environment
 =======================
 
-On the test-target, make sure you install::
-
-  lshw
-  screen
-  time
+On you dev-box, ensure you have qemu armed and ready, and your
+target-environment file providing locations, see the reference env for an
+example.
 
 .. _Cijoe: https://cijoe.readthedocs.io/
 
