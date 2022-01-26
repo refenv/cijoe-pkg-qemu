@@ -1,0 +1,6 @@
+descr: Runs a commmand within a qemu-guests
+descr_long: |
+  That is all there is to it
+
+testsuites:
+  - name: qemu
