@@ -28,7 +28,7 @@ setup(
     url="https://github.com/refenv/cijoe-pkg-qemu",
     license="Apache License 2.0",
     install_requires=[
-        "cijoe (>=0.2.0)"
+        "cijoe (>=0.2.3)"
     ],
     zip_safe=False,
     data_files=[
