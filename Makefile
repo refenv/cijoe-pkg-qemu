@@ -1,4 +1,4 @@
-PROJECT_NAME=cijoe-pkg-xnvme
+PROJECT_NAME=cijoe-pkg-qemu
 PROJECT_VERSION_MAJOR=$(shell grep -oP 'version=\"(\K[0-9\.]+)' setup.py | cut -d "." -f 1)
 PROJECT_VERSION_MINOR=$(shell grep -oP 'version=\"(\K[0-9\.]+)' setup.py | cut -d "." -f 2)
 PROJECT_VERSION_PATCH=$(shell grep -oP 'version=\"(\K[0-9\.]+)' setup.py | cut -d "." -f 3)
