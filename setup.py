@@ -55,8 +55,8 @@ setup(
 
         ("share/cijoe/hooks", glob.glob("hooks/*")),
         ("share/cijoe/modules", glob.glob("modules/*.sh")),
-
         ("share/cijoe/envs", glob.glob("envs/*")),
+
     ] + scan_dfiles('testfiles') + [
         ("share/cijoe/testcases", glob.glob("testcases/*")),
         ("share/cijoe/testsuites", glob.glob("testsuites/*")),
