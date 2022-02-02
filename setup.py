@@ -7,6 +7,25 @@ import os
 from setuptools import setup
 
 
+def scan_dfiles(path):
+    """Scan for everything in path"""
+
+    dfiles = {}
+    for root, _, fnames in os.walk(path):
+        install_path = os.path.join("share", "cijoe", root)
+        if install_path not in dfiles:
+            dfiles[install_path] = []
+
+        for fname in fnames:
+            dfiles[install_path].append(os.path.join(root, fname))
+
+    listing = []
+    for ipath, files in dfiles.items():
+        listing.append((ipath, files))
+
+    return listing
+
+
 def read(*parts):
     """Read parts to use a e.g. long_description"""
 
@@ -38,8 +57,7 @@ setup(
         ("share/cijoe/modules", glob.glob("modules/*.sh")),
 
         ("share/cijoe/envs", glob.glob("envs/*")),
-
-        ("share/cijoe/testfiles", glob.glob("testfiles/*")),
+    ] + scan_dfiles('testfiles') + [
         ("share/cijoe/testcases", glob.glob("testcases/*")),
         ("share/cijoe/testsuites", glob.glob("testsuites/*")),
         ("share/cijoe/testplans", glob.glob("testplans/*"))
