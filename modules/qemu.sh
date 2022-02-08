@@ -485,7 +485,7 @@ qemu.img_from_url() {
     return 1
   fi
 
-  # Download the seed image on qemu-host
+  # Download the cloud-image image on qemu-host
   if ! qemu.hostcmd "[[ -f ${boot_img_bck} ]]"; then
     if ! qemu.hostcmd "wget -O ${boot_img_bck} ${boot_img_url}"; then
       cij.err "qemu.img_from_url: failed downloading: ${boot_img_url}"
@@ -495,7 +495,12 @@ qemu.img_from_url() {
 
   # Copy from backup
   if ! qemu.hostcmd "cp ${boot_img_bck} ${boot_img}"; then
-    cij.err "qemu.img_from_url: failed copying"
+    cij.err "qemu.img_from_url: failed cp ..."
+    return 1
+  fi
+  # Resize image
+  if ! qemu.hostcmd "qemu-img resize ${boot_img} 10G"; then
+    cij.err 'qemu.img_from_url: failed qemu-img resize ...';
     return 1
   fi
 
