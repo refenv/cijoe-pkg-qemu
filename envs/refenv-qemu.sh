@@ -18,7 +18,7 @@ export QEMU_GUESTS=/opt/guests
 export QEMU_GUEST_NAME=emujoe
 export QEMU_GUEST_SSH_FWD_PORT=2222
 export QEMU_GUEST_CONSOLE=sock
-export QEMU_GUEST_MEM=6G
+export QEMU_GUEST_MEM=3G
 export QEMU_GUEST_SMP=4
 export QEMU_GUEST_KERNEL=0
 
