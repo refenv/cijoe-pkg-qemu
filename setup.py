@@ -39,7 +39,7 @@ def read(*parts):
 
 setup(
     name="cijoe-pkg-qemu",
-    version="6.0.6",
+    version="6.0.7",
     description="CIJOE: qemu package",
     long_description=read('README.rst'),
     author="Simon A. F. Lund",
