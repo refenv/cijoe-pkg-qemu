@@ -25,6 +25,7 @@ qemu.cloudimg.up.main() {
 	# Import cijoe and environment definition 'refenv-qemu'
 	pushd "$(cij_root)" && source modules/cijoe.sh && popd || exit
 
+	local cloud_img="https://cloud.debian.org/images/cloud/bullseye/daily/latest/debian-11-generic-amd64-daily.qcow2"
 	local tedef=/tmp/envdef.sh
 
 	cij.info "Creating cijoe target environment definition in '${tedef}'"
@@ -59,7 +60,7 @@ qemu.cloudimg.up.main() {
 		cat "${HOME}/.ssh/id_rsa.pub"
 	} > "${guest}/user-data"
 
-	qemu.img_from_url "https://cloud.debian.org/images/cloud/bullseye/daily/latest/debian-11-generic-amd64-daily.qcow2"
+	qemu.img_from_url "${cloud_img}"
 
 	sleep 10
 
