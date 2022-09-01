@@ -1,3 +1,12 @@
+*.egg-info
+*.img
+*.pyc
+*.zip
+.cache
+.idea
+__pycache__
+build
+cijoe-output*
 dist
 selftest_results
-*.egg-info
+tags
