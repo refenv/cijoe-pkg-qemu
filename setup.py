@@ -1,3 +1,9 @@
+"""
+This is a utility package, that is, contains worklets for building the kernel and
+wrappers around kernel features such as null_blk and kmemleak, since it is not tracking
+a specific version of the kernel, then the version number tracks the main cijoe package
+instead.
+"""
 from setuptools import find_namespace_packages, setup
 
 setup(
@@ -5,10 +11,10 @@ setup(
     version="6.1.1",
     author="Simon A. F. Lund",
     author_email="os@safl.dk",
-    url="https://github.com/refenv/joe-pkg-qemu/",
+    url="https://github.com/refenv/cijoe-pkg-qemu/",
     license="BSD",
     install_requires=[
-        "cijoe",
+        "cijoe>=0.9.1",
         "psutil",
     ],
     python_requires=">=3.9",
