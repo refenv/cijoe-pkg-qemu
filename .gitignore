@@ -8,5 +8,4 @@ __pycache__
 build
 cijoe-output*
 dist
-selftest_results
 tags
