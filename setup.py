@@ -2,7 +2,7 @@ from setuptools import find_namespace_packages, setup
 
 setup(
     name="cijoe-pkg-qemu",
-    version="6.1.0.dev1",
+    version="6.1.1",
     author="Simon A. F. Lund",
     author_email="os@safl.dk",
     url="https://github.com/refenv/joe-pkg-qemu/",
