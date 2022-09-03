@@ -15,7 +15,6 @@ import time
 from pathlib import Path
 
 import psutil
-
 from cijoe.core.misc import download
 
 
@@ -201,13 +200,16 @@ class Guest(object):
         self.initialize()
 
         # Ensure the guest has a cloudinit-image available for "installation"
-        url = self.guest_config["cloudinit"]["url"]
-        cloudinit_img = Path(self.guest_config["cloudinit"]["img"]).resolve()
+        cinit = self.cijoe.config.options["cloudinit"].get(
+            self.guest_config["cloudinit"]
+        )
+
+        cloudinit_img = Path(cinit["img"]).resolve()
         if not cloudinit_img.exists():
             os.makedirs(cloudinit_img.parent, exist_ok=True)
-            err, path = download(url, cloudinit_img)
+            err, path = download(cinit["url"], cloudinit_img)
             if err:
-                log.error(f"download({url}), {cloudinit_img}: failed")
+                log.error(f"download({cinit['url']}), {cloudinit_img}: failed")
                 return err
 
         # Create the boot.img based on cloudinit_img
@@ -215,13 +217,9 @@ class Guest(object):
         qemu_img(self.cijoe, f"resize {self.boot_img} 10G")
 
         # Create seed.img, with data and meta embedded
-        metadata_path = shutil.copyfile(
-            self.guest_config["cloudinit"]["meta"], self.guest_path / "meta-data"
-        )
-        userdata_path = shutil.copyfile(
-            self.guest_config["cloudinit"]["user"], self.guest_path / "user-data"
-        )
-        with Path(self.guest_config["cloudinit"]["pubkey"]).resolve().open() as kfile:
+        metadata_path = shutil.copyfile(cinit["meta"], self.guest_path / "meta-data")
+        userdata_path = shutil.copyfile(cinit["user"], self.guest_path / "user-data")
+        with Path(cinit["pubkey"]).resolve().open() as kfile:
             pubkey = kfile.read()
         with userdata_path.open("a") as userdatafile:
             userdatafile.write("ssh_authorized_keys:\n")
