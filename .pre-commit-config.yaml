@@ -47,3 +47,4 @@ repos:
   hooks:
   - id: shellcheck
     name: Shell-lint
+    exclude: (_deprecated)
