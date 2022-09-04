@@ -190,7 +190,7 @@ class Guest(object):
 
         return err
 
-    def cloudinit(self):
+    def init_using_cloudimg(self):
         """Provision a guest OS using cloudinit"""
 
         # Ensure the guest is *not* running
@@ -200,26 +200,30 @@ class Guest(object):
         self.initialize()
 
         # Ensure the guest has a cloudinit-image available for "installation"
-        cinit = self.cijoe.config.options["cloudinit"].get(
+        cloudinit = self.cijoe.config.options["cloudinit"].get(
             self.guest_config["cloudinit"]
         )
+        cloudinit["img"] = Path(cloudinit["img"]).resolve()
 
-        cloudinit_img = Path(cinit["img"]).resolve()
-        if not cloudinit_img.exists():
-            os.makedirs(cloudinit_img.parent, exist_ok=True)
-            err, path = download(cinit["url"], cloudinit_img)
+        if not cloudinit["img"].exists():
+            os.makedirs(cloudinit["img"].parent, exist_ok=True)
+            err, path = download(cloudinit["url"], cloudinit["img"])
             if err:
-                log.error(f"download({cinit['url']}), {cloudinit_img}: failed")
+                log.error(f"download({cloudinit['url']}), {path}: failed")
                 return err
 
         # Create the boot.img based on cloudinit_img
-        shutil.copyfile(str(cloudinit_img), str(self.boot_img))
+        shutil.copyfile(str(cloudinit["img"]), str(self.boot_img))
         qemu_img(self.cijoe, f"resize {self.boot_img} 10G")
 
         # Create seed.img, with data and meta embedded
-        metadata_path = shutil.copyfile(cinit["meta"], self.guest_path / "meta-data")
-        userdata_path = shutil.copyfile(cinit["user"], self.guest_path / "user-data")
-        with Path(cinit["pubkey"]).resolve().open() as kfile:
+        metadata_path = shutil.copyfile(
+            cloudinit["meta"], self.guest_path / "meta-data"
+        )
+        userdata_path = shutil.copyfile(
+            cloudinit["user"], self.guest_path / "user-data"
+        )
+        with Path(cloudinit["pubkey"]).resolve().open() as kfile:
             pubkey = kfile.read()
         with userdata_path.open("a") as userdatafile:
             userdatafile.write("ssh_authorized_keys:\n")
@@ -244,5 +248,33 @@ class Guest(object):
         if err:
             log.error("failed starting...")
             return err
+
+        return 0
+
+    def init_using_bootimg(self):
+        """Provision a guest OS using a boot image"""
+
+        # Ensure the guest is *not* running
+        self.kill()
+
+        # Ensure the guest has a "home"
+        self.initialize()
+
+        # Ensure the guest has a cloudinit-image available for "installation"
+        boot = self.cijoe.config.options["boot_images"].get(
+            self.guest_config["boot_img"]
+        )
+        boot["img"] = Path(boot["img"]).resolve()
+
+        if not boot["img"].exists():
+            os.makedirs(boot["img"].parent, exist_ok=True)
+            err, path = download(boot["url"], str(boot["img"]))
+            if err:
+                log.error(f"download({boot['url']}), {path}: failed")
+                return err
+
+        # Create the boot.img based on cloudinit_img
+        shutil.copyfile(str(boot["img"]), str(self.boot_img))
+        qemu_img(self.cijoe, f"resize {self.boot_img} 10G")
 
         return 0

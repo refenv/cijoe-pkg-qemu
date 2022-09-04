@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-initialize guest os using cloud-init
-====================================
+initialize guest using boot-image
+=================================
 
 Retargetable: False
 -------------------
@@ -14,4 +14,4 @@ def worklet_entry(args, cijoe, step):
 
     guest = Guest(cijoe, cijoe.config)
 
-    return guest.init_using_cloudimg()
+    return guest.init_using_bootimg()
