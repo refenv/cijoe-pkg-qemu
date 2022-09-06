@@ -3,13 +3,13 @@ doc: |
   This workflow demonstrates how to use qemu via cijoe in steps of:
 
   * Build qemu from source
-  * Instal qemu
+  * Install qemu
   * Provision a guest using a cloudinit image
   * Start the provisioned guest
-  * Run a command within the guest
+  * Run a command within the provisioned guest
   * Stop the guest again
 
-  This is done via worklets, which in turn are utilizing helper-functions from joe.qemu.wrapper.
+  This is done via worklets, which in turn are utilizing helper-functions from cijoe.qemu.wrapper.
 
   When using a configuration with this workflow which looks in { local.env.HOME }, then this
   workflow does not require root/sudo.
@@ -25,7 +25,7 @@ steps:
   uses: qemu.guest_cloudinit
 
 - name: start
-  uses: qemu.guest_start
+  uses: qemu.guest_start_nvme
 
 - name: check
   run: |
