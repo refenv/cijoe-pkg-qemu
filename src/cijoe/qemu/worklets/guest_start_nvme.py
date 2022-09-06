@@ -51,17 +51,24 @@ def worklet_entry(args, cijoe, step):
         "drive": "nvme0n1",
         "bus": "nvme0",
         "nsid": 1,
+        "logical_block_size": 1 << lbads,
+        "physical_block_size": 1 << lbads,
     }
     ns2 = {
         "id": "nvme0n2",
         "drive": "nvme0n2",
         "bus": "nvme0",
         "nsid": 2,
+        "logical_block_size": 1 << lbads,
+        "physical_block_size": 1 << lbads,
         "zoned": "on",
-        "zoned.zone_size": 8192 << lbads,
-        "zoned.zone_capacity": 4096 << lbads,
+        "zoned.zone_size": "32M",
+        "zoned.zone_capacity": "28M",
         "zoned.max_active": 256,
         "zoned.max_open": 256,
+        "zoned.zrwas": 32 << lbads,
+        "zoned.zrwafg": 16 << lbads,
+        "zoned.numzrwa": 256,
     }
 
     # Check that the backing-storage exists, create them if they do not
