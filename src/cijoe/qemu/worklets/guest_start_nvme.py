@@ -21,10 +21,17 @@ def worklet_entry(args, cijoe, step):
     lbads = 12
     drive_size = "8G"
 
-    controller = {
+    controller1 = {
         "id": "nvme0",
         "serial": "deadbeef",
         "bus": "pcie_downstream_port1",
+        "mdts": 7,
+    }
+
+    controller2 = {
+        "id": "nvme1",
+        "serial": "adcdbeef",
+        "bus": "pcie_downstream_port2",
         "mdts": 7,
     }
 
@@ -44,9 +51,18 @@ def worklet_entry(args, cijoe, step):
         "discard": "on",
         "detect-zeroes": "unmap",
     }
-    drives = [drive1, drive2]
+    drive3 = {
+        "id": "nvme1n1",
+        "file": str(guest.guest_path / "nvme1n1.img"),
+        "format": "raw",
+        "if": "none",
+        "discard": "on",
+        "detect-zeroes": "unmap",
+    }
 
-    ns1 = {
+    drives = [drive1, drive2, drive3]
+
+    c1ns1 = {
         "id": "nvme0n1",
         "drive": "nvme0n1",
         "bus": "nvme0",
@@ -54,7 +70,7 @@ def worklet_entry(args, cijoe, step):
         "logical_block_size": 1 << lbads,
         "physical_block_size": 1 << lbads,
     }
-    ns2 = {
+    c1ns2 = {
         "id": "nvme0n2",
         "drive": "nvme0n2",
         "bus": "nvme0",
@@ -69,6 +85,14 @@ def worklet_entry(args, cijoe, step):
         "zoned.zrwas": 32 << lbads,
         "zoned.zrwafg": 16 << lbads,
         "zoned.numzrwa": 256,
+    }
+    c2ns1 = {
+        "id": "nvme1n1",
+        "drive": "nvme1n1",
+        "bus": "nvme1",
+        "nsid": 1,
+        "logical_block_size": 1 << lbads,
+        "physical_block_size": 1 << lbads,
     }
 
     # Check that the backing-storage exists, create them if they do not
@@ -86,13 +110,20 @@ def worklet_entry(args, cijoe, step):
         "-device xio3130-downstream"
         ",id=pcie_downstream_port1,bus=pcie_upstream_port1,chassis=2,slot=1"
     ]
+    nvme += [
+        "-device xio3130-downstream"
+        ",id=pcie_downstream_port2,bus=pcie_upstream_port1,chassis=2,slot=2"
+    ]
 
     nvme += [
-        "-device nvme," + ",".join([f"{k}={v}" for k, v in controller.items()]),
+        "-device nvme," + ",".join([f"{k}={v}" for k, v in controller1.items()]),
         "-drive " + ",".join([f"{k}={v}" for k, v in drive1.items()]),
-        "-device nvme-ns," + ",".join([f"{k}={v}" for k, v in ns1.items()]),
+        "-device nvme-ns," + ",".join([f"{k}={v}" for k, v in c1ns1.items()]),
         "-drive " + ",".join([f"{k}={v}" for k, v in drive2.items()]),
-        "-device nvme-ns," + ",".join([f"{k}={v}" for k, v in ns2.items()]),
+        "-device nvme-ns," + ",".join([f"{k}={v}" for k, v in c1ns2.items()]),
+        "-device nvme," + ",".join([f"{k}={v}" for k, v in controller2.items()]),
+        "-drive " + ",".join([f"{k}={v}" for k, v in drive3.items()]),
+        "-device nvme-ns," + ",".join([f"{k}={v}" for k, v in c2ns1.items()]),
     ]
 
     err = guest.start(extra_args=nvme)
