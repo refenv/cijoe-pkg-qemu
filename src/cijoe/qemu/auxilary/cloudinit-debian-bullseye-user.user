@@ -14,6 +14,11 @@ packages:
 - htop
 - lshw
 - pciutils
+runcmd:
+  - sed -i -e 's/^.*PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config
+  - sed -i -e 's/^.*PermitEmptyPasswords.*$/PermitEmptyPasswords yes/g' /etc/ssh/sshd_config
+  - sed -i -e 's/^.*PasswordAuthentication.*$/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+  - service ssh restart
 final_message: "The system is up, after $UPTIME seconds"
 power_state:
   mode: poweroff
