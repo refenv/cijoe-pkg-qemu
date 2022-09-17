@@ -223,11 +223,14 @@ class Guest(object):
         userdata_path = shutil.copyfile(
             cloudinit["user"], self.guest_path / "user-data"
         )
-        with Path(cloudinit["pubkey"]).resolve().open() as kfile:
-            pubkey = kfile.read()
-        with userdata_path.open("a") as userdatafile:
-            userdatafile.write("ssh_authorized_keys:\n")
-            userdatafile.write(f"- {pubkey}\n")
+
+        # Inject the "pubkey" from config
+        if "pubkey" in cloudinit:
+            with Path(cloudinit["pubkey"]).resolve().open() as kfile:
+                pubkey = kfile.read()
+            with userdata_path.open("a") as userdatafile:
+                userdatafile.write("ssh_authorized_keys:\n")
+                userdatafile.write(f"- {pubkey}\n")
 
         cloud_cmd = " ".join(
             [
