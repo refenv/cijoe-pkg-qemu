@@ -3,7 +3,7 @@
 build qemu system(x86_64-softmmu)
 ==================================
 
-In the build, graphics related features are disabled, virtfs and debugging enabled.
+In the build, virtfs and debugging enabled.
 
 Arguments
 ---------
@@ -32,10 +32,8 @@ def worklet_entry(args, cijoe, step):
     configure_args = [
         f"--prefix={conf['build']['prefix']}",
         "--audio-drv-list=''",
-        "--disable-curses",
         "--disable-docs",
         "--disable-glusterfs",
-        "--disable-gtk",
         "--disable-libnfs",
         "--disable-libusb",
         "--disable-opengl",
