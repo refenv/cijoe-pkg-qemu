@@ -5,6 +5,7 @@ doc: |
   * Build qemu from source
   * Install qemu
   * Provision a guest using a cloudinit image
+    - inject "$HOME/.ssh/id_rsa.pub" into guest as authorized_keys
   * Start the provisioned guest
   * Run a command within the provisioned guest
   * Stop the guest again
