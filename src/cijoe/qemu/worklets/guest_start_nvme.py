@@ -17,7 +17,7 @@ def worklet_entry(args, cijoe, step):
 
     guest = Guest(cijoe, cijoe.config)
 
-    nvme_img_root = step.get("with", {}).get("nvme_img_root", guest.guest_path)
+    nvme_img_root = Path(step.get("with", {}).get("nvme_img_root", guest.guest_path))
 
     # NVMe configuration arguments, a single controller with two namespaces
     lbads = 12
