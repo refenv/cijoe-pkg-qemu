@@ -17,6 +17,8 @@ def worklet_entry(args, cijoe, step):
 
     guest = Guest(cijoe, cijoe.config)
 
+    nvme_img_root = step.get("with", {}).get("nvme_img_root", guest.guest_path)
+
     # NVMe configuration arguments, a single controller with two namespaces
     lbads = 12
     drive_size = "8G"
@@ -37,7 +39,7 @@ def worklet_entry(args, cijoe, step):
 
     drive1 = {
         "id": "nvme0n1",
-        "file": str(guest.guest_path / "nvme0n1.img"),
+        "file": str(nvme_img_root / "nvme0n1.img"),
         "format": "raw",
         "if": "none",
         "discard": "on",
@@ -45,7 +47,7 @@ def worklet_entry(args, cijoe, step):
     }
     drive2 = {
         "id": "nvme0n2",
-        "file": str(guest.guest_path / "nvme0n2.img"),
+        "file": str(nvme_img_root / "nvme0n2.img"),
         "format": "raw",
         "if": "none",
         "discard": "on",
@@ -53,7 +55,7 @@ def worklet_entry(args, cijoe, step):
     }
     drive3 = {
         "id": "nvme1n1",
-        "file": str(guest.guest_path / "nvme1n1.img"),
+        "file": str(nvme_img_root / "nvme1n1.img"),
         "format": "raw",
         "if": "none",
         "discard": "on",

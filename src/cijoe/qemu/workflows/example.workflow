@@ -27,6 +27,8 @@ steps:
 
 - name: start
   uses: qemu.guest_start_nvme
+#  with:
+#    nvme_img_root: "/tmp"
 
 - name: check
   run: |
