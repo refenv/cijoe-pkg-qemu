@@ -8,7 +8,7 @@ from setuptools import find_namespace_packages, setup
 
 setup(
     name="cijoe-pkg-qemu",
-    version="6.1.8",
+    version="6.1.9",
     author="Simon A. F. Lund",
     author_email="os@safl.dk",
     url="https://github.com/refenv/cijoe-pkg-qemu/",
