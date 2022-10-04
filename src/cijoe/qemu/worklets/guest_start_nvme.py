@@ -28,6 +28,7 @@ def worklet_entry(args, cijoe, step):
         "serial": "deadbeef",
         "bus": "pcie_downstream_port1",
         "mdts": 7,
+        "ioeventfd": "on",
     }
 
     controller2 = {
@@ -35,6 +36,7 @@ def worklet_entry(args, cijoe, step):
         "serial": "adcdbeef",
         "bus": "pcie_downstream_port2",
         "mdts": 7,
+        "ioeventfd": "on",
     }
 
     drive1 = {
