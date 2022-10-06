@@ -113,7 +113,7 @@ class Guest(object):
             if elapsed_total > timeout:
                 return False
 
-    def start(self, daemonize=True, extra_args=[]):
+    def start(self, daemonize=True, cloudinit=False, extra_args=[]):
         """."""
 
         args = []
@@ -145,6 +145,27 @@ class Guest(object):
                 "fsdriver=local,id=fsdev0,security_model=mapped,mount_tag=hostshare"
                 f",path={host_share}",
             ]
+
+        kernel = self.guest_config["fancy"].get("kernel", None)
+
+        # cloud-init doesnt work well with kernel fast boot, so do not enable
+        # it in that case
+        if kernel and not cloudinit:
+            kernel_image = kernel.get("image", None)
+            if kernel_image:
+                args += [
+                    "-kernel",
+                    kernel_image,
+                    "-append",
+                    "'root=/dev/vda1 console=ttyS0,115200'",
+                ]
+
+            kernel_share = kernel.get("share", None)
+            if kernel_share:
+                args += [
+                    "-virtfs",
+                    f"local,path={kernel_share},security_model=none,readonly=on,mount_tag=kernel_share",
+                ]
 
         ports = self.guest_config["fancy"].get("tcp_forward", None)
         if ports:
@@ -247,7 +268,7 @@ class Guest(object):
         system_args = []
         system_args += ["-drive", f"file={self.seed_img},if=virtio,format=raw"]
 
-        err = self.start(daemonize=False, extra_args=system_args)
+        err = self.start(daemonize=False, cloudinit=True, extra_args=system_args)
         if err:
             log.error("failed starting...")
             return err
