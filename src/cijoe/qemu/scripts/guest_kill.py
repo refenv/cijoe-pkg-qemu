@@ -9,7 +9,7 @@ Retargetable: False
 from cijoe.qemu.wrapper import Guest
 
 
-def worklet_entry(args, cijoe, step):
+def main(args, cijoe, step):
     """Kill a qemu guest"""
 
     guest = Guest(cijoe, cijoe.config)

@@ -10,7 +10,7 @@ import errno
 from pathlib import Path
 
 
-def worklet_entry(args, cijoe, step):
+def main(args, cijoe, step):
     """Install qemu"""
 
     conf = cijoe.config.options.get("qemu", None)

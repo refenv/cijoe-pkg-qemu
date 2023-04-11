@@ -19,7 +19,7 @@ import logging as log
 from pathlib import Path
 
 
-def worklet_entry(args, cijoe, step):
+def main(args, cijoe, step):
     """Build qemu"""
 
     conf = cijoe.config.options.get("qemu", None)

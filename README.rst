@@ -22,3 +22,6 @@ submit a `Pull request`_ with your changes.
 
 .. _Quickstart Guide: https://cijoe.readthedocs.io/
 .. _Usage: https://cijoe.readthedocs.io/
+.. _GitHub page: https://github.com/refenv/cijoe-pkg-qemu
+.. _Pull request: https://github.com/refenv/cijoe-pkg-qemu/pulls
+.. _Issue: https://github.com/refenv/cijoe-pkg-qemu/issues
