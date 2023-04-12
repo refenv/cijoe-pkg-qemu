@@ -13,6 +13,7 @@ import os
 import shutil
 import time
 from pathlib import Path
+from pprint import pformat
 
 import psutil
 from cijoe.core.misc import download
@@ -36,13 +37,27 @@ class Guest(object):
 
         self.cijoe = cijoe
 
-        self.qemu_config = config.options.get("qemu", None)
-        if not name:
-            name = sorted(self.qemu_config["guests"].keys())[0]
+        qemu_config = config.options.get("qemu", {})
+        if not qemu_config:
+            log.error("config missing section: 'qemu'")
 
-        self.guest_config = self.qemu_config["guests"][name]
+        try:
+            guests = qemu_config["guests"]
 
-        self.guest_path = (Path(self.guest_config["path"])).resolve()
+            name = name if name else sorted(guests.keys())[0]
+            log.debug(f"name({name})")
+
+            guest_config = guests[name]
+            log.debug(f"guest_config({guest_config})")
+
+            guest_path = guest_config["path"]
+        except Exception as exc:
+            log.error(f"invalid qemu_config({pformat(qemu_config)})")
+            raise exc
+
+        self.qemu_config = qemu_config
+        self.guest_config = guest_config
+        self.guest_path = Path(guest_path).resolve()
         self.boot_img = self.guest_path / "boot.img"
         self.seed_img = self.guest_path / "seed.img"
         self.pid = self.guest_path / "guest.pid"
