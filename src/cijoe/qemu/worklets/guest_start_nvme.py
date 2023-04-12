@@ -8,6 +8,7 @@ Retargetable: false
 """
 import errno
 import logging as log
+from pathlib import Path
 
 from cijoe.qemu.wrapper import Guest
 
