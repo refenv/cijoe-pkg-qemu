@@ -194,14 +194,17 @@ class Guest(object):
 
         err = 0
 
-        pid = self.get_pid()
-        if pid:
-            qemu_proc = psutil.Process(pid)
-            qemu_proc.terminate()
+        try:
+            pid = self.get_pid()
+            if pid:
+                qemu_proc = psutil.Process(pid)
+                qemu_proc.terminate()
 
-            gone, alive = psutil.wait_procs([qemu_proc], timeout=3)
-            for proc in alive:
-                proc.kill()
+                gone, alive = psutil.wait_procs([qemu_proc], timeout=3)
+                for proc in alive:
+                    proc.kill()
+        except psutil.NoSuchProcess:
+            log.info("Got 'NoSuchProcess', that is OK, continue.")
 
         return err
 
