@@ -10,7 +10,7 @@ port = 4200
 
 [os]
 name = "debian"
-version = "bookworm"
+version = "bullseye"
 
 # Used by: qemu.build.py
 [qemu.repository]
@@ -35,13 +35,13 @@ img_bin = "{{ local.env.HOME }}/opt/qemu/bin/qemu-img"
 # - qemu.guest_start.py (and qemu.guest_start_nvme.py)
 # - qemu.guest_kill.py
 [qemu.guest]
-path = "{{ local.env.HOME }}/guests/debian-bookworm-amd64"
+path = "{{ local.env.HOME }}/guests/debian-bullseye-amd64"
 
 # Arguments for qemu-system-{arch} 
 #
 # Used by: qemu.guest_start.py (and qemu.guest_start_nvme.py)
 [qemu.guest.system_args]
-kwa = {cpu = "host", smp = 4, m = "6G", accel = "kvm"}
+kw = {cpu = "host", smp = 4, m = "6G", accel = "kvm"}
 raw = """\
 -M "type=q35,kernel_irqchip=split" \
 -device "intel-iommu,pt=on,intremap=on" \
@@ -51,14 +51,14 @@ tcp_forward = {host = 4200, guest = 22}
 host_share = "{{ local.env.HOME }}/git"
 
 # Used by: qemu.guest_init_using_image.py
-#[qemu.guest.init_using_image]
-#url = "https://refenv.fra1.digitaloceanspaces.com/boot_images/debian-bookworm-amd64.qcow2"
-#img = "{{ local.env.HOME }}/images/boot_images/debian-bookworm-amd64.qcow2"
+[qemu.guest.init_using_image]
+url = "https://refenv.fra1.digitaloceanspaces.com/boot_images/debian-bullseye-amd64.qcow2"
+img = "{{ local.env.HOME }}/images/boot_images/debian-bullseye-amd64.qcow2"
 
 # Used by: qemu.guest_init_using_cloudinit_image
 [qemu.guest.init_using_cloudinit_image]
-url = "https://cloud.debian.org/images/cloud/bookworm/daily/latest/debian-12-generic-amd64-daily.qcow2"
-img = "{{ local.env.HOME }}/images/cloudinit/debian-12-generic-amd64-daily.qcow2"
+url = "https://cloud.debian.org/images/cloud/bullseye/daily/latest/debian-11-generic-amd64-daily.qcow2"
+img = "{{ local.env.HOME }}/images/cloudinit/debian-11-generic-amd64-daily.qcow2"
 meta = "{{ resources.auxiliary['qemu.cloudinit-debian-meta'] }}"
 user = "{{ resources.auxiliary['qemu.cloudinit-debian-user-amd64'] }}"
 #pubkey = "keys/guest_key.pub"
