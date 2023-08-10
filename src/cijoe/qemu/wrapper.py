@@ -293,9 +293,7 @@ class Guest(object):
         self.initialize()  # Ensure the guest has a "home"
 
         # Ensure the guest has an image available to boot from
-        boot = self.cijoe.config.options["boot_images"].get(
-            self.guest_config["boot_img"]
-        )
+        boot = self.guest_config.get("init_using_image", {})
         boot["img"] = Path(boot["img"]).resolve()
 
         if not boot["img"].exists():
