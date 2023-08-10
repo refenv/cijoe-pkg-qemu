@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-build qemu system(x86_64-softmmu)
-==================================
+build qemu-system(x86_64 aarch64)
+=================================
 
 In the build, virtfs and debugging enabled.
 
@@ -46,7 +46,7 @@ def main(args, cijoe, step):
         "--disable-xen",
         "--enable-debug",
         "--enable-virtfs",
-        "--target-list=x86_64-softmmu",
+        "--target-list=x86_64-softmmu,aarch64-softmmu",
     ]
 
     err, _ = cijoe.run_local(f"mkdir -p {build_dir}")

@@ -32,29 +32,18 @@ def qemu_system(cijoe, args=""):
 
 
 class Guest(object):
-    def __init__(self, cijoe, config, name=None):
+    def __init__(self, cijoe, config):
         """."""
 
-        self.cijoe = cijoe
-
         qemu_config = config.options.get("qemu", {})
-        if not qemu_config:
-            log.error("config missing section: 'qemu'")
+        guest_config = qemu_config.get("guest", {})
+        guest_path = guest_config.get("path", None)
 
-        try:
-            guests = qemu_config["guests"]
-
-            name = name if name else sorted(guests.keys())[0]
-            log.debug(f"name({name})")
-
-            guest_config = guests[name]
-            log.debug(f"guest_config({guest_config})")
-
-            guest_path = guest_config["path"]
-        except Exception as exc:
+        if not (qemu_config and guest_config and guest_path):
             log.error(f"invalid qemu_config({pformat(qemu_config)})")
-            raise exc
+            raise ValueError("Invalid configuration")
 
+        self.cijoe = cijoe
         self.qemu_config = qemu_config
         self.guest_config = guest_config
         self.guest_path = Path(guest_path).resolve()
@@ -133,15 +122,17 @@ class Guest(object):
 
         args = []
 
-        # Create qemu-system args
-        for key, value in self.guest_config["system_args"].items():
+        system_args = self.guest_config.get("system_args", {})
+
+        # Key-word arguments: config.qemu.guest.system_args.kwa
+        for key, value in system_args.get("kwa", {}).items():
             args.append(f"-{key}")
             if isinstance(value, dict):
                 args.append(next((f"{opt}={val}" for opt, val in value.items())))
             else:
                 args.append(str(value))
 
-        # magic-option, when 'boot.img' exists, add it is as boot-drive
+        # Magic: when 'boot.img' exists, add it is as boot-drive
         if self.boot_img.exists():
             args += [
                 "-blockdev",
@@ -149,27 +140,7 @@ class Guest(object):
             ]
             args += ["-device", "virtio-blk-pci,drive=boot"]
 
-        #
-        # Fancy-args
-        #
-        host_share = self.guest_config["fancy"].get("host_share", None)
-        if host_share:
-            host_share = Path(host_share).resolve()
-            args += [
-                "-virtfs",
-                "fsdriver=local,id=fsdev0,security_model=mapped,mount_tag=hostshare"
-                f",path={host_share}",
-            ]
-
-        ports = self.guest_config["fancy"].get("tcp_forward", None)
-        if ports:
-            args += [
-                "-netdev",
-                f"user,id=n1,ipv6=off,hostfwd=tcp::{ports['host']}-:{ports['guest']}",
-            ]
-            args += ["-device", "virtio-net-pci,netdev=n1"]
-
-        # Management stuff
+        # Process Management stuff
         args += ["-pidfile", str(self.pid)]
         args += ["-monitor", f"unix:{self.monitor},server,nowait"]
 
@@ -181,9 +152,38 @@ class Guest(object):
             args += ["-nographic"]
             args += ["-serial", "mon:stdio"]
 
+        #
+        # Managed: config.qemu.guest.system_args.host_share
+        #
+        host_share = system_args.get("host_share", None)
+        if host_share:
+            host_share = Path(host_share).resolve()
+            args += [
+                "-virtfs",
+                "fsdriver=local,id=fsdev0,security_model=mapped,mount_tag=hostshare"
+                f",path={host_share}",
+            ]
+
+        #
+        # Managed: config.qemu.guest.system_args.tcp_forward
+        #
+        ports = system_args.get("tcp_forward", None)
+        if ports:
+            args += [
+                "-netdev",
+                f"user,id=n1,ipv6=off,hostfwd=tcp::{ports['host']}-:{ports['guest']}",
+            ]
+            args += ["-device", "virtio-net-pci,netdev=n1"]
+
+        #
+        # Arguments provided via wrapper-class
+        #
         args += extra_args
 
-        args += [self.guest_config.get("extra_args", "")]
+        #
+        # Raw: config.qemu.guest.system_args.raw
+        #
+        args += [system_args.get("raw", "")]
 
         err, _ = qemu_system(self.cijoe, " ".join(args))
 
@@ -208,30 +208,38 @@ class Guest(object):
 
         return err
 
-    def init_using_cloudimg(self):
+    def init_using_cloudinit_image(self):
         """Provision a guest OS using cloudinit"""
 
-        # Ensure the guest is *not* running
-        self.kill()
-
-        # Ensure the guest has a "home"
-        self.initialize()
+        self.kill()  # Ensure the guest is *not* running
+        self.initialize()  # Ensure the guest has a "home"
 
         # Ensure the guest has a cloudinit-image available for "installation"
-        cloudinit = self.cijoe.config.options["cloudinit"].get(
-            self.guest_config["cloudinit"]
-        )
-        cloudinit["img"] = Path(cloudinit["img"]).resolve()
+        cloudinit = self.guest_config.get("init_using_cloudinit_image", {})
+        if not cloudinit:
+            log.error("missing config([qemu.guest.init_using_cloudinit_image])")
+            return 1
 
-        if not cloudinit["img"].exists():
-            os.makedirs(cloudinit["img"].parent, exist_ok=True)
-            err, path = download(cloudinit["url"], cloudinit["img"])
+        img = cloudinit.get("img", None)
+        if not img:
+            log.error("missing config([qemu.guest.init_using_cloudinit_image.img])")
+            return 1
+
+        img = Path(img).resolve()
+        if not img.exists():
+            url = cloudinit.get("url", None)
+            if not url:
+                log.error("missing config([qemu.guest.init_using_cloudinit_image.url])")
+                return 1
+
+            img.parent.mkdir(parents=True, exist_ok=True)
+            err, path = download(url, img)
             if err:
-                log.error(f"download({cloudinit['url']}), {path}: failed")
+                log.error(f"download({url}), {path}: failed")
                 return err
 
         # Create the boot.img based on cloudinit_img
-        shutil.copyfile(str(cloudinit["img"]), str(self.boot_img))
+        shutil.copyfile(str(img), str(self.boot_img))
         qemu_img(self.cijoe, f"resize {self.boot_img} 10G")
 
         # Create seed.img, with data and meta embedded
@@ -250,11 +258,17 @@ class Guest(object):
                 userdatafile.write("ssh_authorized_keys:\n")
                 userdatafile.write(f"- {pubkey}\n")
 
+        # This uses mkisofs instead of cloud-localds, such that it works on
+        # macOS and Linux, the 'mkisofs' should be available with 'cdrtools'
         cloud_cmd = " ".join(
             [
-                "cloud-localds",
-                "-v",
+                "mkisofs",
+                "-output",
                 str(self.seed_img),
+                "-volid",
+                "cidata",
+                "-joliet",
+                "-rock",
                 str(userdata_path),
                 str(metadata_path),
             ]
@@ -272,16 +286,13 @@ class Guest(object):
 
         return 0
 
-    def init_using_bootimg(self):
-        """Provision a guest OS using a boot image"""
+    def init_using_image(self):
+        """Provision a guest OS using a bootable disk-image"""
 
-        # Ensure the guest is *not* running
-        self.kill()
+        self.kill()  # Ensure the guest is *not* running
+        self.initialize()  # Ensure the guest has a "home"
 
-        # Ensure the guest has a "home"
-        self.initialize()
-
-        # Ensure the guest has a cloudinit-image available for "installation"
+        # Ensure the guest has an image available to boot from
         boot = self.cijoe.config.options["boot_images"].get(
             self.guest_config["boot_img"]
         )
