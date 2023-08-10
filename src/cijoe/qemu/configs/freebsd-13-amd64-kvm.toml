@@ -9,8 +9,8 @@ hostname = "localhost"
 port = 4200
 
 [os]
-name = "debian"
-version = "bullseye"
+name = "freebsd"
+version = "13"
 
 # Used by: qemu.build.py
 [qemu.repository]
@@ -35,29 +35,30 @@ img_bin = "{{ local.env.HOME }}/opt/qemu/bin/qemu-img"
 # - qemu.guest_start.py (and qemu.guest_start_nvme.py)
 # - qemu.guest_kill.py
 [qemu.guest]
-path = "{{ local.env.HOME }}/guests/debian-bullseye-amd64"
+path = "{{ local.env.HOME }}/guests/freebsd-13-amd64"
 
+# Arguments for qemu-system-{arch} 
+#
 # Used by: qemu.guest_start.py (and qemu.guest_start_nvme.py)
 [qemu.guest.system_args]
-kw = {cpu = "host", smp = 4, m = "6G", accel = "kvm"}
+kwa = {cpu = "host", smp = 4, m = "6G", accel = "kvm"}
 raw = """\
- -machine type=q35,kernel_irqchip=split \
- -device intel-iommu,pt=on,intremap=on \
- -netdev user,id=n1,ipv6=off,hostfwd=tcp::4200-:22 \
- -device virtio-net-pci,netdev=n1 \
+-M "type=q35,kernel_irqchip=split" \
+-device "intel-iommu,pt=on,intremap=on" \
 """
-# Below is another popular qemu-system argument for setting up 9p
-#-virtfs fsdriver=local,id=fsdev0,security_model=mapped,mount_tag=hostshare,path={{ local.env.HOME }}/shared
+# Managed by qemu.guest_start.py, expands into longer system-arguments
+tcp_forward = {host = 4200, guest = 22}
+host_share = "{{ local.env.HOME }}/git"
 
 # Used by: qemu.guest_init_using_image.py
 [qemu.guest.init_using_image]
-url = "https://refenv.fra1.digitaloceanspaces.com/boot_images/debian-bullseye-amd64.qcow2"
-img = "{{ local.env.HOME }}/images/boot_images/debian-bullseye-amd64.qcow2"
+url = "https://refenv.fra1.digitaloceanspaces.com/boot_images/freebsd-13-amd64.qcow2"
+img = "{{ local.env.HOME }}/images/boot_images/freebsd-13-amd64.qcow2"
 
 # Used by: qemu.guest_init_using_cloudinit_image
 [qemu.guest.init_using_cloudinit_image]
-url = "https://cloud.debian.org/images/cloud/bullseye/daily/latest/debian-11-generic-amd64-daily.qcow2"
-img = "{{ local.env.HOME }}/images/cloudinit/debian-11-generic-amd64-daily.qcow2"
-meta = "{{ resources.auxiliary['qemu.cloudinit-debian-bullseye-meta'] }}"
-user = "{{ resources.auxiliary['qemu.cloudinit-debian-bullseye-user'] }}"
+url = "https://refenv.fra1.digitaloceanspaces.com/freebsd13-ufs-ksrc.qcow2"
+img = "{{ local.env.HOME}}/images/cloudinit/freebsd13-ufs-ksrc.qcow2"
+meta = "{{ resources.auxiliary['qemu.cloudinit-freebsd-meta'] }}"
+user = "{{ resources.auxiliary['qemu.cloudinit-freebsd-user'] }}"
 #pubkey = "keys/guest_key.pub"
