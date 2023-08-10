@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Start a qemu-guest
+Start a qemu guest
 ==================
 
 Retargetable: false
