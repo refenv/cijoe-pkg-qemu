@@ -32,7 +32,7 @@ img_bin = "{{ local.env.HOME }}/opt/qemu/bin/qemu-img"
 # qemu guest (aka virtual-machines / vm / qemu-system instance)
 #
 # Used by:
-# - qemu.guest_start.py (and qemu.guest_start_nvme.py)
+# - qemu.guest_start.py
 # - qemu.guest_kill.py
 [qemu.guest]
 path = "{{ local.env.HOME }}/guests/debian-bookworm-arm64"
