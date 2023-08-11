@@ -4,7 +4,7 @@
 # Used by: cijoe.run() / cijoe.get() / cijoe.put()
 [transport.ssh]
 username = "root"
-password = "root"
+password = ""
 hostname = "localhost"
 port = 4200
 
@@ -27,38 +27,32 @@ prefix = "{{ local.env.HOME }}/opt/qemu"
 #system_bin = "/opt/qemu/bin/qemu-system-x86_64"
 system_bin = "{{ local.env.HOME }}/opt/qemu/bin/qemu-system-x86_64"
 img_bin = "{{ local.env.HOME }}/opt/qemu/bin/qemu-img"
+default_guest = "freebsd_13"
 
-#
-# qemu guest (aka virtual-machines / vm / qemu-system instance)
-#
-# Used by:
-# - qemu.guest_start.py (and qemu.guest_start_nvme.py)
-# - qemu.guest_kill.py
-[qemu.guest]
+# Used by: qemu.guest_start.py and qemu.guest_kill.py
+[qemu.guests.freebsd_13]
 path = "{{ local.env.HOME }}/guests/freebsd-13-amd64"
 
-# Arguments for qemu-system-{arch} 
-#
 # Used by: qemu.guest_start.py (and qemu.guest_start_nvme.py)
-[qemu.guest.system_args]
-kwa = {cpu = "host", smp = 4, m = "6G", accel = "kvm"}
-raw = """\
+system_args.kwa = {cpu = "host", smp = 4, m = "6G", accel = "kvm"}
+
+# Raw arguments: passed without modification to qemu-system-{arch}
+system_args.raw = """\
 -M "type=q35,kernel_irqchip=split" \
 -device "intel-iommu,pt=on,intremap=on" \
 """
+
 # Managed by qemu.guest_start.py, expands into longer system-arguments
-tcp_forward = {host = 4200, guest = 22}
-host_share = "{{ local.env.HOME }}/git"
+system_args.tcp_forward = {host = 4200, guest = 22}
+system_args.host_share = "{{ local.env.HOME }}/git"
 
-# Used by: qemu.guest_init_using_image.py
-[qemu.guest.init_using_image]
-url = "https://refenv.fra1.digitaloceanspaces.com/boot_images/freebsd-13.1-ksrc-amd64.qcow2"
-img = "{{ local.env.HOME }}/images/boot_images/freebsd-13-amd64.qcow2"
+# Used by: qemu.guest_init_using_bootimage.py
+init_using_bootimage.url = "https://refenv.fra1.digitaloceanspaces.com/boot_images/freebsd-13.1-ksrc-amd64.qcow2"
+init_using_bootimage.img = "{{ local.env.HOME }}/images/boot_images/freebsd-13-amd64.qcow2"
 
-# Used by: qemu.guest_init_using_cloudinit_image
-[qemu.guest.init_using_cloudinit_image]
-url = "https://refenv.fra1.digitaloceanspaces.com/freebsd13-ufs-ksrc.qcow2"
-img = "{{ local.env.HOME}}/images/cloudinit/freebsd13-ufs-ksrc.qcow2"
-meta = "{{ resources.auxiliary['qemu.cloudinit-freebsd-meta'] }}"
-user = "{{ resources.auxiliary['qemu.cloudinit-freebsd-user'] }}"
-#pubkey = "keys/guest_key.pub"
+# Used by: qemu.guest_init_using_cloudinit.py
+init_using_cloudinit.url = "https://refenv.fra1.digitaloceanspaces.com/freebsd13-ufs-ksrc.qcow2"
+init_using_cloudinit.img = "{{ local.env.HOME}}/images/cloudinit/freebsd13-ufs-ksrc.qcow2"
+init_using_cloudinit.meta = "{{ resources.auxiliary['qemu.cloudinit-freebsd-meta'] }}"
+init_using_cloudinit.user = "{{ resources.auxiliary['qemu.cloudinit-freebsd-user'] }}"
+#init_using_cloudinit.pubkey = "keys/guest_key.pub"

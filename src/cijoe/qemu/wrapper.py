@@ -32,14 +32,24 @@ def qemu_system(cijoe, args=""):
 
 
 class Guest(object):
-    def __init__(self, cijoe, config):
+    def __init__(self, cijoe, config, guest_name=None):
         """."""
 
         qemu_config = config.options.get("qemu", {})
-        guest_config = qemu_config.get("guest", {})
-        guest_path = guest_config.get("path", None)
+        qemu_guests = qemu_config.get("guests", [])
+        if not (qemu_config and qemu_guests):
+            raise ValueError(f"Invalid qemu_config({pformat(qemu_config)})")
 
-        if not (qemu_config and guest_config and guest_path):
+        guest_name = qemu_config.get("default_guest", list(qemu_guests.keys())[0])
+        if not guest_name:
+            raise ValueError(f"Invalid qemu_config({pformat(qemu_config)})")
+
+        guest_config = qemu_guests.get(guest_name, None)
+        if not guest_config:
+            raise ValueError(f"Invalid qemu_config({pformat(qemu_config)})")
+
+        guest_path = guest_config.get("path", None)
+        if not (guest_config and guest_path):
             log.error(f"invalid qemu_config({pformat(qemu_config)})")
             raise ValueError("Invalid configuration")
 
@@ -104,6 +114,7 @@ class Guest(object):
             try:
                 with self.serial.open() as serialfile:
                     if "login:" in serialfile.read():
+                        time.sleep(10)
                         return True
             except Exception as exc:
                 log.error(f"{exc}")
@@ -208,28 +219,28 @@ class Guest(object):
 
         return err
 
-    def init_using_cloudinit_image(self):
+    def init_using_cloudinit(self):
         """Provision a guest OS using cloudinit"""
 
         self.kill()  # Ensure the guest is *not* running
         self.initialize()  # Ensure the guest has a "home"
 
         # Ensure the guest has a cloudinit-image available for "installation"
-        cloudinit = self.guest_config.get("init_using_cloudinit_image", {})
+        cloudinit = self.guest_config.get("init_using_cloudinit", {})
         if not cloudinit:
-            log.error("missing config([qemu.guest.init_using_cloudinit_image])")
+            log.error("missing config([qemu.guest.init_using_cloudinit])")
             return 1
 
         img = cloudinit.get("img", None)
         if not img:
-            log.error("missing config([qemu.guest.init_using_cloudinit_image.img])")
+            log.error("missing config([qemu.guest.init_using_cloudinit.img])")
             return 1
 
         img = Path(img).resolve()
         if not img.exists():
             url = cloudinit.get("url", None)
             if not url:
-                log.error("missing config([qemu.guest.init_using_cloudinit_image.url])")
+                log.error("missing config([qemu.guest.init_using_cloudinit.url])")
                 return 1
 
             img.parent.mkdir(parents=True, exist_ok=True)
@@ -286,14 +297,14 @@ class Guest(object):
 
         return 0
 
-    def init_using_image(self):
+    def init_using_bootimage(self):
         """Provision a guest OS using a bootable disk-image"""
 
         self.kill()  # Ensure the guest is *not* running
         self.initialize()  # Ensure the guest has a "home"
 
         # Ensure the guest has an image available to boot from
-        boot = self.guest_config.get("init_using_image", {})
+        boot = self.guest_config.get("init_using_bootimage", {})
         boot["img"] = Path(boot["img"]).resolve()
 
         if not boot["img"].exists():

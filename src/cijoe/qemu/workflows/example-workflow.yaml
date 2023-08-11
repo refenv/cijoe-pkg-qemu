@@ -21,7 +21,7 @@ steps:
   uses: qemu.install
 
 - name: cloudinit
-  uses: qemu.guest_init_using_cloudinit_image
+  uses: qemu.guest_init_using_cloudinit
 
 #
 # In case you do not want to use cloud-init and you already have a bootable
@@ -31,7 +31,7 @@ steps:
 # point to where the bootable image can be downloaded or copied from.
 #
 #- name: bootimg
-#  uses: qemu.guest_init_using_image
+#  uses: qemu.guest_init_using_bootimage
 
 - name: start
   uses: qemu.guest_start

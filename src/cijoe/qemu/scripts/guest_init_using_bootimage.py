@@ -4,12 +4,12 @@ Create ``boot.img`` from a bootable disk-image
 ==============================================
 
 Initialize the guest's boot image (``boot.img``) using an existing bootable
-disk-image at ``qemu.guest.init_using_image.img``. When the image-file is not
-available, then it will be downloaded from ``qemu.guest.init_using_image.url``.
+disk-image at ``qemu.guest.init_using_bootimage.img``. When the image-file is not
+available, then it will be downloaded from ``qemu.guest.init_using_bootimage.url``.
 
 Config::
 
-    [qemu.guest.init_using_image]
+    [qemu.guest.init_using_bootimage]
     url = # URL pointing to download location of the bootable disk-image
     img = # Absolute path to disk-image file"
 
@@ -24,4 +24,4 @@ def main(args, cijoe, step):
 
     guest = Guest(cijoe, cijoe.config)
 
-    return guest.init_using_image()
+    return guest.init_using_bootimage()

@@ -5,14 +5,14 @@ Create ``boot.img`` from a cloud-init image
 
 Initialize the guest's boot image (``boot.img``) using a
 cloud-init image. When the cloud-init image at
-``qemu.guest.init_using_cloudinit_image.img`` does not
+``qemu.guest.init_using_cloudinit.img`` does not
 exist, then it is downloaded from
-``qemu.guest.init_using_cloudinit_image.url`` and stored at
-``qemu.guest.init_using_cloudinit_image.img`` for re-use.
+``qemu.guest.init_using_cloudinit.url`` and stored at
+``qemu.guest.init_using_cloudinit.img`` for re-use.
 
 Config::
 
-    [qemu.guest.init_using_cloudinit_image]
+    [qemu.guest.init_using_cloudinit]
     url = # URL of cloud-init image, e.g. somewhere on https://cloud.debian.org/images/cloud/
     img = # Path to cloud-init image
     meta = # Path to cloud-init meta-file
@@ -30,4 +30,4 @@ def main(args, cijoe, step):
 
     guest = Guest(cijoe, cijoe.config)
 
-    return guest.init_using_cloudinit_image()
+    return guest.init_using_cloudinit()
